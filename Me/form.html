@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+    </style>
+<body>
+    <div class="w3-container">
+        <div class="w3-row w3-margin">
+            <div class="w3-col">
+                <a href="index.html"><i class="fa fa-chevron-circle-left" aria-hidden="true"></i></a>
+            </div>
+        </div>
+        <div class="w3-row w3-margin">
+            <form class="w3-container w3-card-4" name="product-form">
+                <h2 class="w3-text-blue">Tạo mới sản phẩm</h2>
+                <p>
+                    <label class="w3-text-blue"><b>Tên</b></label>
+                    <input class="w3-input w3-border" name="name" type="text">
+                </p>
+                <p>
+                    <label class="w3-text-blue"><b>Lương</b></label>
+                    <input class="w3-input w3-border" name="price" type="number" min="1">
+                </p>
+                <p>
+                    <input type="submit" class="w3-btn w3-blue" name="submit" value="Save">
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // chờ document load đầy đủ, dựng cây DOM.
+        document.addEventListener('DOMContentLoaded', function () {
+            var action = 1; // 1 là tạo mới, 2 là update.
+            var url = 'http://localhost:8080/api/v1/employees';
+            var method = 'POST';
+            // check id tồn tại hay không?
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) {
+                action = 2; // chuyển trạng thái form sang update
+            }
+            // lấy btn submit
+            var btnSubmit = document.forms['product-form']['submit'];
+            // lấy thông tin input
+            var inputName = document.forms['product-form']['name'];
+            var inputPrice = document.forms['product-form']['price'];
+
+
+
+
+            
+            if (action === 2) {
+                url = `http://localhost:8080/api/v1/employees/${id}`;
+                method = 'PUT';
+                loadProductDetail(id);
+            }
+            btnSubmit.onclick = function (e) {
+                debugger;
+                e.preventDefault(); // không để submit           
+                var objectToSend = {
+                    'name': inputName.value,
+                    'price': inputPrice.value,
+
+
+                }
+                var data = JSON.stringify(objectToSend); // parse từ obj to string
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 201 || xhr.status === 200) {
+                        alert('Thao tác thành công');
+                        window.location.href = 'index.html'; // đưa về trang danh sách sản phẩm.
+                    }
+                }
+                xhr.open(method, url, false);
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhr.send(data);
+            }
+        });
+
+        function loadProductDetail(id) {
+            var getProductDetailUrl = `http://localhost:8080/api/v1/employees/${id}`;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        var productDetail = JSON.parse(xhr.responseText);
+                        document.forms['product-form']['name'].value = productDetail.name;
+                        document.forms['product-form']['price'].value = productDetail.price;
+
+                    } else {
+                        alert('Không thể load sản phẩm!');
+                    }
+                }
+            }
+            xhr.open('GET', getProductDetailUrl, false);
+            xhr.send();
+        }
+    </script>
+</body>
+
+</html>
